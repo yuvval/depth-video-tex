@@ -1,0 +1,31 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+
+\newcommand{\norm}[1]{\left\lVert #1 \right\rVert}
+
+\title{depth video tex}
+\author{yuval }
+\date{September 2015}
+
+\begin{document}
+
+\maketitle
+
+\section{Sketch}
+
+Given an image and it's depth estimation, we define a quadratic loss:
+
+\begin{equation}
+\sum_{i,j}{w_{i,j} (x_i  - x_j)^2} + \sum_{k}{(x_k - d_k)}
+\end{equation}
+where, $d_k$ represents the depth estimation per pixel $k$ and $w_{i,j}$ equals
+\begin{equation}
+w_{i,j} = exp(-1/\rho \norm{edge\_intensity_{i,j}}^2)
+\end{equation}
+if pixels $i,j$ are neighbouring pixels, or $0$ otherwise. 
+
+${w_{i,j} (x_i  - x_j)^2}$ is a smoothness term that encourage neighbouring pixels to have a similar depth if there is not edge between them.
+$\rho$ controls the balance between the given depth estimation and the smoothness term.
+
+\end{document}
