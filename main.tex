@@ -3,6 +3,10 @@
 \usepackage{amsmath}
 
 \newcommand{\norm}[1]{\left\lVert #1 \right\rVert}
+\newcommand\mat[1]{{#1}}
+\newcommand{\T}{{}^\mathsf{T}}
+\newcommand{\eqdef}{\doteq}
+\renewcommand\vec[1]{\mathbf{#1}}
 
 \title{depth video tex}
 \author{yuval }
@@ -17,7 +21,8 @@
 Given an image and it's depth estimation, we define a quadratic loss:
 
 \begin{equation}
-\sum_{i,j}{w_{i,j} (x_i  - x_j)^2} + \sum_{k}{(x_k - d_k)}
+\sum_{i,j}{w_{i,j} (x_i  - x_j)^2} + \sum_{k}{(x_k - d_k)^2}
+\label{objective-elem}
 \end{equation}
 where, $d_k$ represents the depth estimation per pixel $k$ and $w_{i,j}$ equals
 \begin{equation}
@@ -25,7 +30,37 @@ w_{i,j} = exp(-1/\rho \norm{edge\_intensity_{i,j}}^2)
 \end{equation}
 if pixels $i,j$ are neighbouring pixels, or $0$ otherwise. 
 
-${w_{i,j} (x_i  - x_j)^2}$ is a smoothness term that encourage neighbouring pixels to have a similar depth if there is not edge between them.
+${w_{i,j} (x_i  - x_j)^2}$ is a smoothness term that encourage neighbouring pixels to have a similar depth if there is no edge between them.
 $\rho$ controls the balance between the given depth estimation and the smoothness term.
 
+The first (binary) term of \eqref{objective-elem} can be formulated in matrix notation as:
+\begin{equation}
+x\T \mat{W^{b}} x
+\end{equation}
+where 
+\begin{align}
+\mat{W^{b}} \eqdef \mat{W^{r}} + \mat{W^{c}} - 2\mat{W}\\
+\mat{W}_{i,j} \eqdef w_{i,j}
+\end{align}
+and $\mat{W^{r}}$, $\mat{W^{c}}$ are diagonal matrices that their diagonal elements equal to:
+\begin{align}
+\mat{W^{r}}_{i,i} \eqdef \sum_{j}{w_{i,j}}\\ \mat{W^{c}}_{j,j} \eqdef \sum_{i}{w_{i,j}} \end{align}
+
+The second (unary) term of \eqref{objective-elem} can be formulated in matrix notation as:
+\begin{equation}
+x\T \mat{I} x + -2 \vec{d}\T x + \vec{d}\T \vec{d}
+\end{equation}
+where \mat{I} is a square identity matrix and $\vec{d}$ is the vector of given estimated depths.
+
+Wrapping it up, \eqref{objective-elem} results with
+\begin{equation}
+x\T \mat{W}^{q} x - 2 \vec{d}\T x + \vec{d}\T \vec{d}
+\end{equation}
+where $\mat{W}^{q} \eqdef \mat{W^{r}} + \mat{W^{c}} - 2\mat{W} + \mat{I} $
+
+
+
+
+
 \end{document}
+
