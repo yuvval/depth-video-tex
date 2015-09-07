@@ -16,7 +16,7 @@
 
 \maketitle
 
-\section{Sketch}
+\section{Intra Frame Constraints}
 
 Given an image and it's depth estimation, we define a quadratic loss:
 
@@ -26,12 +26,13 @@ Given an image and it's depth estimation, we define a quadratic loss:
 \end{equation}
 where, $d_k$ represents the depth estimation per pixel $k$ and $w_{i,j}$ equals
 \begin{equation}
-w_{i,j} = exp(-1/\rho \norm{edge\_intensity_{i,j}}^2)
+w_{i,j} = exp(-1/\rho_{_{E}} \norm{edge\_intensity_{i,j}}^2)
+\label{weights_intra}
 \end{equation}
 if pixels $i,j$ are neighbouring pixels, or $0$ otherwise. 
 
-${w_{i,j} (x_i  - x_j)^2}$ is a smoothness term that encourage neighbouring pixels to have a similar depth if there is no edge between them.
-$\rho$ controls the balance between the given depth estimation and the smoothness term.
+${w_{i,j} (x_i  - x_j)^2}$ is a smoothness term that encourages neighbouring pixels to have a similar depth if there is no edge between them.
+$\rho_{_{E}}$ controls the balance between the given depth estimation and the smoothness term.
 
 The first (binary) term of \eqref{objective-elem} can be formulated in matrix notation as:
 \begin{equation}
@@ -61,6 +62,19 @@ where $\mat{W}^{q} \eqdef \mat{W^{r}} + \mat{W^{c}} - 2\mat{W} + \mat{I} $
 
 
 
+\section{Inter Frame Constraints}
+
+We now add constraints between two consecutive frames $\{t, t+1\}$ of depth estimations. Note that we index all pixels depth values over space (i,j) and time (k) to a 1D vector array. 
+
+For each frame we evaluate the optical flow (OF) of each pixel to the next one. Then, we can represent the flow with the vector array indices. Pixel $m$ (originated from frame $t$), now is mapped to pixel $n$. For each such $m,n$ transition between consecutive frames, we introduce a weight $w_{m,n}$ which depends on the OF magnitude
+\begin{equation}
+w_{m,n} = exp(-1/\rho_{_{OF}} \norm{OF\_magnitude_{m,n}}^2)
+\label{weights_inter}
+\end{equation}
+if there is an OF between pixels $m,n$, or $0$ otherwise. 
+$\rho_{_{OF}}$ controls the balance between the given depth estimation and the OF smoothness term.
+
+We extend \eqref{objective-elem} to account for consecutive frames, such that \eqref{weights_intra} is evaluated for pixels that reside within each of the frames and \eqref{weights_inter} is evaluated for pixels that reside between consecutive frames.
 
 \end{document}
 
